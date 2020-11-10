@@ -1,30 +1,30 @@
-package com.simplybusiness.inspector
+package whatever
+
 import net.snowflake.client.jdbc.internal.joda.time.DateTime
 import java.security.InvalidParameterException
 
-class Faker {
+class Any {
     companion object {
-        fun anyInt(min: Int = -100000, max: Int = 100000): Int = (min..max).random()
-        fun around(num: Int): Int = this.anyOf(listOf(num-1, num, num+1))
-        fun anyIntPositive(max: Int = 100000, includeZero: Boolean = true): Int {
+        fun int(min: Int = -100000, max: Int = 100000): Int = (min..max).random()
+        fun intPositive(max: Int = 100000, includeZero: Boolean = true): Int {
             if (includeZero) {
-                return anyInt(min = 0, max = max)
+                return int(min = 0, max = max)
             }
-            return anyInt(min = 1, max = max)
+            return int(min = 1, max = max)
         }
 
-        fun<T> anyOf(items: Collection<T>): T {
+        fun<T> of(items: Collection<T>): T {
             val size = items.size
             if(size == 0){
                 throw InvalidParameterException("Faker.anyOf() needs at least an item to do its job")
             }
 
-            val randomindex = anyIntPositive(size - 1)
+            val randomindex = intPositive(size - 1)
             return items.elementAt(randomindex)
         }
 
-        fun<T> anyListOf(builder: () -> T, withMinLength: Int = 0, withMaxLength: Int = 10): List<T> {
-            val amountItems = anyInt(min=withMinLength, max=withMaxLength)
+        fun<T> listOf(builder: () -> T, withMinLength: Int = 1, withMaxLength: Int = 3): List<T> {
+            val amountItems = int(min=withMinLength, max=withMaxLength)
 
             val items = mutableListOf<T>()
             for (i in 1..amountItems) {
@@ -34,52 +34,41 @@ class Faker {
             return items.toList()
         }
 
-        fun<T> anyListOf(builder: () -> T, withAround: Int=1): List<T> {
-            val around = Faker.around(withAround)
-
-            val items = mutableListOf<T>()
-            for (i in 1..around) {
-                items.add(builder())
-            }
-
-            return items.toList()
-        }
-
-        fun anyString(withMaxLength: Int = 30, withMinLength: Int = 3, withCharactersPool: List<Char> ? = null, allowEmpty: Boolean = false): String {
+        fun string(withMaxLength: Int = 30, withMinLength: Int = 3, withCharactersPool: List<Char> ? = null, allowBlank: Boolean = false): String {
             val charactersPool: List<Char> = withCharactersPool ?: ('a'..'z') + ('A'..'Z') + ('0'..'9') + listOf('.', '_', '-', ' ', '#', '!', '/', '\\')
-            val randomLength = anyInt(min = withMinLength, max = withMaxLength)
+            val randomLength = int(min = withMinLength, max = withMaxLength)
 
             var randomTextAccumulator = ""
             (0..randomLength).forEach{
-                randomTextAccumulator += anyOf(charactersPool)
+                randomTextAccumulator += of(charactersPool)
             }
 
-            if(allowEmpty) {
-                return anyOf(listOf("", randomTextAccumulator))
+            if(allowBlank) {
+                return of(listOf("", randomTextAccumulator))
             }
 
             return randomTextAccumulator
         }
 
-        fun anyWord(allowEmpty: Boolean = false): String {
+        fun word(allowBlank: Boolean = false): String {
             val charactersPool : List<Char> = ('a'..'z') + ('A'..'Z') + ('0'..'9')
-            return anyString(withMinLength = 4, withMaxLength = 30, withCharactersPool = charactersPool, allowEmpty = allowEmpty)
+            return string(withMinLength = 3, withMaxLength = 6, withCharactersPool = charactersPool, allowBlank = allowBlank)
         }
 
-        fun<T> aNullOr(builder: () -> T): T? {
+        fun<T> nullOr(builder: () -> T): T? {
             val item: T = builder()
 
-            return anyOf(listOf(null, item))
+            return of(listOf(null, item))
         }
 
-        fun anyDateTime(): DateTime {
+        fun dateTime(): DateTime {
             return DateTime()
-                    .withYear(Faker.anyIntPositive(3000))
-                    .withMonthOfYear(Faker.anyIntPositive(12, includeZero = false))
-                    .withDayOfMonth(Faker.anyIntPositive(28, includeZero = false))
-                    .withHourOfDay(Faker.anyIntPositive(23))
-                    .withMinuteOfHour(Faker.anyIntPositive(59))
-                    .withSecondOfMinute(Faker.anyIntPositive(59))
+                    .withYear(Any.intPositive(3000))
+                    .withMonthOfYear(Any.intPositive(12, includeZero = false))
+                    .withDayOfMonth(Any.intPositive(28, includeZero = false))
+                    .withHourOfDay(Any.intPositive(23))
+                    .withMinuteOfHour(Any.intPositive(59))
+                    .withSecondOfMinute(Any.intPositive(59))
         }
     }
 }
